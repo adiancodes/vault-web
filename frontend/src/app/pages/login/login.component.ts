@@ -51,14 +51,15 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(username, password).subscribe({
       next: (res) => {
-        const externalLinkName = this.route.snapshot.queryParamMap.get(
-          'externalLink',
-        );
+        const externalLinkName =
+          this.route.snapshot.queryParamMap.get('externalLink');
         const externalLink = EXTERNAL_DOMAIN_LINKS.find(
           (link) => link.name === externalLinkName,
         );
         if (externalLink?.forwardVaultWebToken) {
-          window.location.assign(resolveExternalLinkUrl(externalLink, res.token));
+          window.location.assign(
+            resolveExternalLinkUrl(externalLink, res.token),
+          );
           return;
         }
 
