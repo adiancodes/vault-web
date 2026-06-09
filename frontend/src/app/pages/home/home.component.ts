@@ -323,9 +323,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-    displayUsername(username: string): string {
-  return username === this.currentUsername
-    ? `${username} (You)`
-    : username;
-}
+  displayUsername(username: string): string {
+    return username === this.currentUsername ? `${username} (You)` : username;
+  }
 }
