@@ -322,4 +322,10 @@ export class HomeComponent implements OnInit {
       String(this.isAllUsersExpanded),
     );
   }
+
+    displayUsername(username: string): string {
+  return username === this.currentUsername
+    ? `${username} (You)`
+    : username;
+}
 }
