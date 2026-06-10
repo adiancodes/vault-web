@@ -81,6 +81,7 @@ export class CloudComponent implements OnInit {
   pageSize = 50;
   totalElements = 0;
   private contentPage = 0;
+  private contentRequestId = 0;
 
   private draggedPath: string | null = null;
   private draggedIsFolder = false;
@@ -153,16 +154,21 @@ export class CloudComponent implements OnInit {
   }
 
   private loadFolderContent(relativePath: string, page: number) {
+    // Guard against out-of-order responses: when the user navigates or pages
+    // quickly, an earlier (slower) request must not overwrite newer state.
+    const requestId = ++this.contentRequestId;
     this.cloudService
       .getFolderContent(relativePath, page, this.pageSize)
       .subscribe({
         next: (contentPage) => {
+          if (requestId !== this.contentRequestId) return;
           this.entries = this.buildEntries(contentPage.content);
           this.totalElements = contentPage.totalElements;
           this.contentPage = contentPage.pageNumber;
           this.loading = false;
         },
         error: () => {
+          if (requestId !== this.contentRequestId) return;
           this.error = 'Error loading folder contents';
           this.toast.error(
             'Could not load folder',
