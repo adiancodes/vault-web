@@ -70,6 +70,7 @@
               <p-button
                 icon="pi pi-trash"
                 severity="danger"
+                ariaLabel="Delete permanently"
                 styleClass="p-button-rounded p-button-text p-button-sm"
                 [disabled]="isProcessing(entry.id)"
                 (click)="confirmPurge(entry)"
