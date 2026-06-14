@@ -76,37 +76,42 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     const token = localStorage.getItem('token');
-    return !!token && !this.isTokenExpired(token);
+    if (!token) {
+      return false;
+    }
+    const payload = this.decodeTokenPayload(token);
+    // A token we cannot decode is treated as logged-out (fail closed), so a stale or
+    // malformed token never grants navigation to protected pages. A valid token with no
+    // `exp` claim never expires and stays logged in; otherwise it must not be past expiry.
+    if (payload === null) {
+      return false;
+    }
+    if (typeof payload.exp !== 'number') {
+      return true;
+    }
+    return Date.now() < payload.exp * 1000;
   }
 
-  // A present-but-expired token must not count as logged in, otherwise authGuard
-  // would let a stale session navigate to protected pages. If the token can't be
-  // decoded we fall back to "not expired" and let the 401 + refresh flow handle
-  // it, to avoid logging the user out on a parsing quirk.
-  private isTokenExpired(token: string): boolean {
-    const expiryMs = this.getTokenExpiryMs(token);
-    return expiryMs !== null && Date.now() >= expiryMs;
-  }
-
-  private getTokenExpiryMs(token: string): number | null {
+  private decodeTokenPayload(token: string): { exp?: number } | null {
     const parts = token.split('.');
     if (parts.length !== 3) {
       return null;
     }
     try {
-      const payload = JSON.parse(this.decodeBase64Url(parts[1])) as {
-        exp?: number;
-      };
-      return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+      return JSON.parse(this.decodeBase64Url(parts[1])) as { exp?: number };
     } catch {
       return null;
     }
   }
 
+  // JWT payloads are base64url-encoded UTF-8; decode to bytes and run them through
+  // TextDecoder so non-ASCII claims don't corrupt the parse.
   private decodeBase64Url(value: string): string {
     const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-    const padding = (4 - (base64.length % 4)) % 4;
-    return atob(base64 + '='.repeat(padding));
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
   }
 
   logout(): void {

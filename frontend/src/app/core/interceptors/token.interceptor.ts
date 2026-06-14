@@ -74,7 +74,7 @@ function handleUnauthorized(
   error: HttpErrorResponse,
 ) {
   // If the refresh endpoint itself returned 401, the refresh token is invalid.
-  if (req.url.includes('/refresh')) {
+  if (req.url.includes('/auth/refresh')) {
     authService.logout();
     return throwError(() => error);
   }
