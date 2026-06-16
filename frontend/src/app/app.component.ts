@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs/internal/operators/filter';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ThemeService } from './services/theme.service';
